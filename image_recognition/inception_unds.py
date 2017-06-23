@@ -4,8 +4,11 @@ try:
     import pandas as  pd
     import numpy as np
     import tensorflow as tf
+    from script_discussing_labels import *
 except ImportError:
     print ('One or many packages not installed')
+#Download the inception model.
+data_url = "http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz"
 
 #global variables
 tensor_name_input_jpeg = "DecodeJpeg/contents:0"
@@ -85,10 +88,31 @@ def create_feed_dict(image_path,tensor_input_jpeg_1):
     feed_dict= {tensor_input_jpeg_1:image_data}
     return feed_dict
 
+def get_the_prediction(input_graph,input_softmax_tensor,input_feed_dict_image):
+    with tf.Session(graph= input_graph) as sess:
+        y_= sess.run(input_softmax_tensor, feed_dict=input_feed_dict_image)
+    pred= np.squeeze(y_)
+    sess.close()
+    return pred
 
+def classify(pred):
+    uid_to_name_dict, uid_to_class, cls_to_uid= lookup()
+    # Get a sorted index for the pred-array.
+    idx = pred.argsort()
 
+        # The index is sorted lowest-to-highest values. Take the last k.
+    top_k = idx[-10:]
 
+    # Iterate the top-k classes in reversed order (i.e. highest first).
+    for cls in reversed(top_k):
+            # Lookup the class-name.
+        name = cls_to_name(cls,cls_to_uid,uid_to_name_dict)
 
+            # Predicted score (or probability) for this class.
+        score = pred[cls]
+
+            # Print the score and class-name.
+        print("{0:>6.2%} : {1}".format(score, name))
 
 
 
@@ -96,5 +120,4 @@ if __name__ == '__main__':
     input_tensor_jpeg, input_tensor_image, input_tensor_resized_image, softmax_tensor, softmax_logits_tensor, transfer_layer_tensor,graph= load_inception()
     names_ , tensors_= get_the_ops_tensors_from_graph(graph)
     feed_dict_image= create_feed_dict('/Users/vprasad/Desktop/cropped_panda.jpg',input_tensor_jpeg)
-    with tf.Session(graph=graph) as sess:
-        y_=sess.run(softmax_logits_tensor,feed_dict=feed_dict_image)
+    classify(get_the_prediction(graph,softmax_tensor,feed_dict_image))

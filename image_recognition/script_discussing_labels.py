@@ -1,5 +1,6 @@
 import pandas as pd
 import tensorflow as tf
+#The code is for understanding the labels available in inception and how to get the correct labels for all the 1000 classes
 
 
 def lookup():
@@ -56,4 +57,11 @@ def lookup():
                 cls_to_uid[cls]= uid
     return uid_to_name_dict, uid_to_class, cls_to_uid
 
-uid_to_name_dict, uid_to_class, cls_to_uid= lookup()
+#Get the final class name.
+def cls_to_name(cls,cls_to_uid,uid_to_name_dict):
+    #get the uid
+    uid= cls_to_uid[cls]
+    name= uid_to_name_dict[uid]
+    return name
+
+# uid_to_name_dict, uid_to_class, cls_to_uid= lookup()
